@@ -7,17 +7,17 @@ public class Client
 	//describe the requesting rhythm which also can be seen as the requesting interval time
 	public enum RHYTHM
 	{
-		BALANCE, POSSION
+		BALANCE, POSSION,TRACE
 	}
 
 	//describe the requesting contents(urls) portion
 	public enum POPULARITY
 	{
-		EVEN, ZIPF, FIXEDPORTION
+		EVEN, ZIPF
 	}
 
 	//init a agent to do the detail execution.
-	public Client(double duration, RHYTHM rhythm, int rhythm_param,
+	public Client(double duration, RHYTHM rhythm, String rhythm_param,
 			POPULARITY popularity, double zipf_param)
 	{
 		agent=new WorkAgent();

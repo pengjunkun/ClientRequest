@@ -1,25 +1,27 @@
+import org.apache.commons.math3.distribution.ZipfDistribution;
+
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
-public class ZipfUrlIteration extends URLIteration {
+public class ZipfUrlIteration extends URLIteration
+{
+
+	private ZipfDistribution zipfDistribution;
+
+	@Override public boolean hasNext()
+	{
+		return true;
+	}
+
+	@Override public String next()
+	{
+		return URLIteration.constructURL(zipfDistribution.sample());
+	}
+
 	public ZipfUrlIteration(double zipf_param)
 	{
-		super();
-	}
-
-	@Override public Iterator<String> iterator()
-	{
-		return null;
-	}
-
-	@Override public void forEach(Consumer<? super String> action)
-	{
-
-	}
-
-	@Override public Spliterator<String> spliterator()
-	{
-		return null;
+		zipfDistribution = new ZipfDistribution(URLIteration.rangeTO,
+				zipf_param);
 	}
 }

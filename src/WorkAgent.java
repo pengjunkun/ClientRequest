@@ -17,18 +17,21 @@ public class WorkAgent
 	}
 
 	//2nd function, describe the request rhythm(interval time,unit: millisecond)
-	public void setRequestRhythm(Client.RHYTHM rhythm, int rhythm_param)
+	public void setRequestRhythm(Client.RHYTHM rhythm, String rhythm_param)
 	{
 		switch (rhythm)
 		{
 		case BALANCE:
 			//when use the rhythm of balance, the parameter is treated as the requesting count per second
 			//the count can not be bigger than 1000, but it can be less than 1, which means several seconds once.
-			requestRhythm = new BalanceRhythm(rhythm_param);
+			requestRhythm = new BalanceRhythm(Integer.parseInt(rhythm_param));
 			break;
 		case POSSION:
 			//when use the rhythm of possion, the parameter is treated as lambda of possion distribution
-			requestRhythm = new PoissonRhythm(rhythm_param);
+			requestRhythm = new PoissonRhythm(Integer.parseInt(rhythm_param));
+			break;
+		case TRACE:
+			requestRhythm = new TraceRhythm(rhythm_param);
 			break;
 		}
 		//set the urlIteration in the function of 'setPopularity', as this variable will be created there.
@@ -43,25 +46,13 @@ public class WorkAgent
 			//every url will be requested in the same frequency
 			urlIteration = new EvenUrlIteration();
 			break;
-		case FIXEDPORTION:
-			//each url is requested in a fxied portion which is given in the file of fixedPopularityPortion.txt
-			File fixedPortionFile = new File("./fixedPopularityPortion.txt");
-			if (!fixedPortionFile.exists())
-			{
-				System.out.println(
-						"ERROR: please make sure the file \"./fixedPopularityPortion.txt\" exist!");
-				System.exit(1);
-			}
-			//Todo: implement the detail logics
-			urlIteration = new FixedPortionUrlIteration();
-			break;
 		case ZIPF:
 			//Todo: implement the detail logics
 			urlIteration = new ZipfUrlIteration(zipf_param);
 			break;
 		}
 		//set the urlIteration in the function of 'setPopularity', as this variable will be created there.
-		requestRhythm.setUrlIteration(urlIteration.iterator());
+		requestRhythm.setUrlIteration(urlIteration);
 	}
 
 	//start the testing process from this function
@@ -70,14 +61,14 @@ public class WorkAgent
 		requestRhythm.execute();
 	}
 
-	public static void reportByPrint(int duration, int requestCount,int responseCount,
-			double latencySum, double sizeSum)
+	public static void reportByPrint(int duration, int requestCount,
+			int responseCount, double latencySum, double sizeSum)
 	{
 
 		System.out.println("===============report==================");
 		System.out.println(
 				"In " + duration / 1000 + " seconds, sent " + requestCount
-						+ " requests, received "+responseCount);
+						+ " requests, received " + responseCount);
 		//calculte the average
 		System.out.printf("the average latency is: %.2f ms;\n",
 				(latencySum / responseCount));

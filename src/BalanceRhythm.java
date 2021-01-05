@@ -1,22 +1,10 @@
-import java.net.Authenticator;
-import java.net.InetSocketAddress;
-import java.net.ProxySelector;
-import java.net.URI;
-import java.net.http.HttpClient;
 import java.net.http.HttpHeaders;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.time.Duration;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.SimpleFormatter;
 
 public class BalanceRhythm extends RequestRhythm
 {
@@ -56,8 +44,6 @@ public class BalanceRhythm extends RequestRhythm
 		}
 
 		//add all the tasks into Timer:
-
-		System.out.println("first out:" + Thread.currentThread().getId());
 		timer.schedule(getRequestTask(), 0, period);
 
 		//use durationTimer to control the request duration
@@ -68,11 +54,8 @@ public class BalanceRhythm extends RequestRhythm
 				//when duration arrives, cancel all the requests
 				timer.cancel();
 
-				//calculte the average
-				System.out.println("the average latency in " + get_duration()/1000
-						+ "seconds is: " + (latencySum / requestCount)+"ms");
-				System.out.println("the average throughput in " + get_duration()/1000
-						+ "seconds is: " + (sizeSum/1024) / Duration.ofMillis(get_duration()).toSeconds()+"KB/s");
+				//print the result
+				WorkAgent.reportByPrint(get_duration(),requestCount,latencySum,sizeSum);
 
 				System.exit(0);
 			}
@@ -91,7 +74,7 @@ public class BalanceRhythm extends RequestRhythm
 				{
 					//get the url
 					String url = getUrlIteration().next();
-					System.out.println("request URL:" + url);
+					System.out.println(requestCount+". request URL:" + url);
 
 					//get the request which is just started in async way.
 					CompletableFuture<HttpResponse<Path>> response = myHttp
@@ -101,7 +84,7 @@ public class BalanceRhythm extends RequestRhythm
 
 					//the first parameter is used to record the start time of request
 					//the second param is a callback which can help calculate the latency and size
-					//response.completeOnTimeout(null, 5, TimeUnit.SECONDS);
+					response.completeOnTimeout(null, 5, TimeUnit.SECONDS);
 					response.thenAcceptBoth(CompletableFuture
 									.completedStage(System.currentTimeMillis()),
 							//the two params are from two completedstages
@@ -110,10 +93,10 @@ public class BalanceRhythm extends RequestRhythm
 								{
 									System.out.println(
 											"There is one request timeout!!!");
+									//timeout is 5s
+									latencySum+=5000;
 									return;
 								}
-								System.out.println("it worked!");
-
 								HttpHeaders headers = pathHttpResponse
 										.headers();
 								int size = Integer.parseInt(

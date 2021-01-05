@@ -3,7 +3,7 @@
  */
 public class Client
 {
-	private DoRequest agent;
+	private WorkAgent agent;
 	//describe the requesting rhythm which also can be seen as the requesting interval time
 	public enum RHYTHM
 	{
@@ -20,7 +20,7 @@ public class Client
 	public Client(double duration, RHYTHM rhythm, int rhythm_param,
 			POPULARITY popularity, double zipf_param)
 	{
-		agent=new DoRequest();
+		agent=new WorkAgent();
 		agent.setDuration(duration);
 		agent.setRequestRhythm(rhythm,rhythm_param);
 		agent.setPopularity(popularity,zipf_param);
@@ -29,7 +29,6 @@ public class Client
 	//start
 	public void run(){
 		agent.doRequest();
-		System.out.println("finish all!");
 	}
 
 }

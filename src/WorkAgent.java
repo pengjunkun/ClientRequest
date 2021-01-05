@@ -1,10 +1,11 @@
 import java.io.File;
+import java.time.Duration;
 
 /*
 	main logic class
 	use this class to control the whole request test process
  */
-public class DoRequest
+public class WorkAgent
 {
 	private RequestRhythm _requestRhythm;
 	private URLIteration urlIteration;
@@ -67,5 +68,16 @@ public class DoRequest
 	public void doRequest()
 	{
 		_requestRhythm.execute();
+	}
+
+	public static void reportByPrint(int duration,int requestCount,double latencySum,double sizeSum){
+
+		System.out.println("===============report==================");
+		System.out.println("In "+ duration/1000 + "seconds, sent "+requestCount+" requests.");
+		//calculte the average
+		System.out.printf("the average latency is: %.2f ms;\n", (latencySum / requestCount));
+		System.out.printf("the average throughput is: %.2f KB/s.\n",(sizeSum/1024) / Duration
+				.ofMillis(duration).toSeconds());
+
 	}
 }

@@ -16,8 +16,8 @@ public class WorkAgent
 		RequestRhythm.setDuration(duration);
 	}
 
-	//2nd function, describe the request rhythm(interval time)
-	public void setRequestRhythm(Client.RHYTHM rhythm, float rhythm_param)
+	//2nd function, describe the request rhythm(interval time,unit: millisecond)
+	public void setRequestRhythm(Client.RHYTHM rhythm, int rhythm_param)
 	{
 		switch (rhythm)
 		{
@@ -70,17 +70,17 @@ public class WorkAgent
 		requestRhythm.execute();
 	}
 
-	public static void reportByPrint(int duration, int requestCount,
+	public static void reportByPrint(int duration, int requestCount,int responseCount,
 			double latencySum, double sizeSum)
 	{
 
 		System.out.println("===============report==================");
 		System.out.println(
-				"In " + duration / 1000 + "seconds, sent " + requestCount
-						+ " requests.");
+				"In " + duration / 1000 + " seconds, sent " + requestCount
+						+ " requests, received "+responseCount);
 		//calculte the average
 		System.out.printf("the average latency is: %.2f ms;\n",
-				(latencySum / requestCount));
+				(latencySum / responseCount));
 		System.out.printf("the average throughput is: %.2f KB/s.\n",
 				(sizeSum / 1024) / Duration.ofMillis(duration).toSeconds());
 		System.out.println("===============report==================");

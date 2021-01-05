@@ -7,6 +7,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.function.BiConsumer;
 
 public abstract class RequestRhythm
 {
@@ -15,14 +16,16 @@ public abstract class RequestRhythm
 	private static Iterator urlIteration;
 	private MyHttp myHttp;
 
-	private double latencySum;
-	private long sizeSum;
-	private int requestCount;
+	protected double latencySum;
+	protected long sizeSum;
+	protected int requestCount;
+	protected int responseCount;
 
 	public RequestRhythm()
 	{
 		myHttp=new MyHttp();
 		requestCount = 0;
+		responseCount=0;
 		latencySum = 0;
 		sizeSum = 0;
 	}
@@ -69,14 +72,14 @@ public abstract class RequestRhythm
 				timer.cancel();
 
 				//print the result
-				WorkAgent.reportByPrint(get_duration(),requestCount,latencySum,sizeSum);
+				WorkAgent.reportByPrint(get_duration(),requestCount,responseCount,latencySum,sizeSum);
 
 				System.exit(0);
 			}
 		}, get_duration());
 	}
 
-	public TimerTask getRequestTask(){
+	public TimerTask getRequestTask(BiConsumer action){
 		TimerTask task = new TimerTask()
 		{
 			@Override public void run()
@@ -97,32 +100,7 @@ public abstract class RequestRhythm
 					//the second param is a callback which can help calculate the latency and size
 					response.completeOnTimeout(null, 5, TimeUnit.SECONDS);
 					response.thenAcceptBoth(CompletableFuture
-									.completedStage(System.currentTimeMillis()),
-							//the two params are from two completedstages
-							(pathHttpResponse, startTimeStamp) -> {
-								if (pathHttpResponse == null)
-								{
-									System.out.println(
-											"There is one request timeout!!!");
-									//timeout is 5s
-									latencySum+=5000;
-									return;
-								}
-								HttpHeaders headers = pathHttpResponse
-										.headers();
-								int size = Integer.parseInt(
-										headers.firstValue("Content-Length")
-												.orElse(null));
-								sizeSum += size;
-
-								long latency = System.currentTimeMillis()
-										- startTimeStamp;
-								latencySum += latency;
-
-								System.out.println(
-										String.format("fileSize:%s", size));
-								System.out.println("latency:" + latency);
-							});
+									.completedStage(System.currentTimeMillis()),action);
 
 				}
 			}

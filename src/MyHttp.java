@@ -25,20 +25,16 @@ public class MyHttp
 	{
 		this.client = HttpClient.newBuilder()
 			.version(HttpClient.Version.HTTP_1_1)
-			.followRedirects(HttpClient.Redirect.NORMAL)
 			.connectTimeout(Duration.ofSeconds(20))
 			.build();
 	}
 
 	//
 	public  CompletableFuture<HttpResponse<Path>> get(String uri) {
-		HttpRequest request = HttpRequest.newBuilder()
-				.uri(URI.create(uri))
-				.header("Content-Type", "video/mp4")
-				.build();
+		HttpRequest request = HttpRequest.newBuilder(URI.create(uri)).build();
 		//use bodyhanlder to convert receiving bytes into a file
 			CompletableFuture<HttpResponse<Path>> response=client.sendAsync(request,
-					HttpResponse.BodyHandlers.ofFile(Paths.get("/Users/pengjunkun/Desktop/packetProject/ClientRequest/downloads/a")));
+					HttpResponse.BodyHandlers.ofFile(Paths.get("./downloads/a")));
 		return response;
 	}
 

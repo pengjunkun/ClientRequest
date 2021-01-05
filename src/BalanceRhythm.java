@@ -69,10 +69,10 @@ public class BalanceRhythm extends RequestRhythm
 				timer.cancel();
 
 				//calculte the average
-				System.out.println("the average latency in " + get_duration()
-						+ "minutes is: " + (latencySum / requestCount));
-				System.out.println("the average throughput in " + get_duration()
-						+ "minutes is: " + (sizeSum / requestCount));
+				System.out.println("the average latency in " + get_duration()/1000
+						+ "seconds is: " + (latencySum / requestCount)+"ms");
+				System.out.println("the average throughput in " + get_duration()/1000
+						+ "seconds is: " + (sizeSum/1024) / Duration.ofMillis(get_duration()).toSeconds()+"KB/s");
 
 				System.exit(0);
 			}
@@ -101,11 +101,9 @@ public class BalanceRhythm extends RequestRhythm
 
 					//the first parameter is used to record the start time of request
 					//the second param is a callback which can help calculate the latency and size
-					CompletableFuture<Long> c = new CompletableFuture();
-					c.complete(System.currentTimeMillis());
-					response.completeOnTimeout(null, 5, TimeUnit.SECONDS);
-					response.thenAcceptBoth(c,
-							//response.thenAcceptBoth(CompletableFuture.completedStage(System.currentTimeMillis()),
+					//response.completeOnTimeout(null, 5, TimeUnit.SECONDS);
+					response.thenAcceptBoth(CompletableFuture
+									.completedStage(System.currentTimeMillis()),
 							//the two params are from two completedstages
 							(pathHttpResponse, startTimeStamp) -> {
 								if (pathHttpResponse == null)
@@ -114,6 +112,7 @@ public class BalanceRhythm extends RequestRhythm
 											"There is one request timeout!!!");
 									return;
 								}
+								System.out.println("it worked!");
 
 								HttpHeaders headers = pathHttpResponse
 										.headers();

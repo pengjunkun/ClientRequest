@@ -7,7 +7,7 @@ public class Main
 {
 	public static void main(String[] args)
 	{
-		Client client = new Client(0.4, Client.RHYTHM.BALANCE, 2, Client.POPULARITY.EVEN,
+		Client client = new Client(0.2, Client.RHYTHM.BALANCE, 2, Client.POPULARITY.EVEN,
 				0);
 		client.run();
 	}

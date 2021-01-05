@@ -7,7 +7,7 @@ import java.time.Duration;
  */
 public class WorkAgent
 {
-	private RequestRhythm _requestRhythm;
+	private RequestRhythm requestRhythm;
 	private URLIteration urlIteration;
 
 	//1st function, describe the testing duration
@@ -24,11 +24,11 @@ public class WorkAgent
 		case BALANCE:
 			//when use the rhythm of balance, the parameter is treated as the requesting count per second
 			//the count can not be bigger than 1000, but it can be less than 1, which means several seconds once.
-			_requestRhythm = new BalanceRhythm(rhythm_param);
+			requestRhythm = new BalanceRhythm(rhythm_param);
 			break;
 		case POSSION:
 			//when use the rhythm of possion, the parameter is treated as lambda of possion distribution
-			_requestRhythm = new PoissonRhythm(rhythm_param);
+			requestRhythm = new PoissonRhythm(rhythm_param);
 			break;
 		}
 		//set the urlIteration in the function of 'setPopularity', as this variable will be created there.
@@ -61,23 +61,29 @@ public class WorkAgent
 			break;
 		}
 		//set the urlIteration in the function of 'setPopularity', as this variable will be created there.
-		_requestRhythm.setUrlIteration(urlIteration.iterator());
+		requestRhythm.setUrlIteration(urlIteration.iterator());
 	}
 
 	//start the testing process from this function
 	public void doRequest()
 	{
-		_requestRhythm.execute();
+		requestRhythm.execute();
 	}
 
-	public static void reportByPrint(int duration,int requestCount,double latencySum,double sizeSum){
+	public static void reportByPrint(int duration, int requestCount,
+			double latencySum, double sizeSum)
+	{
 
 		System.out.println("===============report==================");
-		System.out.println("In "+ duration/1000 + "seconds, sent "+requestCount+" requests.");
+		System.out.println(
+				"In " + duration / 1000 + "seconds, sent " + requestCount
+						+ " requests.");
 		//calculte the average
-		System.out.printf("the average latency is: %.2f ms;\n", (latencySum / requestCount));
-		System.out.printf("the average throughput is: %.2f KB/s.\n",(sizeSum/1024) / Duration
-				.ofMillis(duration).toSeconds());
+		System.out.printf("the average latency is: %.2f ms;\n",
+				(latencySum / requestCount));
+		System.out.printf("the average throughput is: %.2f KB/s.\n",
+				(sizeSum / 1024) / Duration.ofMillis(duration).toSeconds());
+		System.out.println("===============report==================");
 
 	}
 }

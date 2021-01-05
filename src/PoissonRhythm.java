@@ -1,11 +1,16 @@
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class PoissonRhythm extends RequestRhythm {
 
+//	private pii
 	public PoissonRhythm(float rhythm_param)
 	{
 		super();
 	}
 
-	public void execute() {
-		throw new UnsupportedOperationException();
+	@Override public Timer makeTimer()
+	{
+		return null;
 	}
 }

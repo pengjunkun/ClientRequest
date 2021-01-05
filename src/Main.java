@@ -15,8 +15,6 @@ public class Main
 		client.run();
 
 	}
-	//完善zipf分布
-	//不用存储
 	//添加trace content
 	//how to send reuqests
 	//test the maximum requests

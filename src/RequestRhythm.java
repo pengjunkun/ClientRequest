@@ -91,7 +91,7 @@ public abstract class RequestRhythm
 					System.out.println(requestCount+". request URL:" + url);
 
 					//get the request which is just started in async way.
-					CompletableFuture<HttpResponse<Path>> response = myHttp
+					CompletableFuture<HttpResponse<Void>> response = myHttp
 							.get(url);
 					//after send the request, count one more
 					requestCount++;

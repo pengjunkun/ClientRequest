@@ -11,7 +11,7 @@ public class WorkAgent
 	private URLIteration urlIteration;
 
 	//1st function, describe the testing duration
-	public void setDuration(double duration)
+	public void setDuration(int duration)
 	{
 		RequestRhythm.setDuration(duration);
 	}
@@ -38,7 +38,7 @@ public class WorkAgent
 	}
 
 	//3nd function, describe the request content popularity
-	public void setPopularity(Client.POPULARITY popularity, double zipf_param)
+	public void setPopularity(Client.POPULARITY popularity, String pop_param)
 	{
 		switch (popularity)
 		{
@@ -47,12 +47,16 @@ public class WorkAgent
 			urlIteration = new EvenUrlIteration();
 			break;
 		case ZIPF:
-			//Todo: implement the detail logics
-			urlIteration = new ZipfUrlIteration(zipf_param);
+			urlIteration = new ZipfUrlIteration(Float.parseFloat(pop_param));
 			break;
 		}
 		//set the urlIteration in the function of 'setPopularity', as this variable will be created there.
 		requestRhythm.setUrlIteration(urlIteration);
+	}
+
+	public void setGranularity(int granularity)
+	{
+		requestRhythm.setGranularity(granularity);
 	}
 
 	//start the testing process from this function
@@ -65,16 +69,17 @@ public class WorkAgent
 			int responseCount, double latencySum, double sizeSum)
 	{
 
-		System.out.println("===============report==================");
+		System.out.printf("===============report:%d==================\n",System.currentTimeMillis());
 		System.out.println(
-				"In " + duration / 1000 + " seconds, sent " + requestCount
+				"In " + duration + " seconds, sent " + requestCount
 						+ " requests, received " + responseCount);
 		//calculte the average
 		System.out.printf("the average latency is: %.2f ms;\n",
 				(latencySum / responseCount));
 		System.out.printf("the average throughput is: %.2f KB/s.\n",
-				(sizeSum / 1024) / Duration.ofMillis(duration).toSeconds());
+				(sizeSum / 1024) / duration);
 		System.out.println("===============report==================");
 
 	}
+
 }

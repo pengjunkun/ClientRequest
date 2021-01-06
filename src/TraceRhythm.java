@@ -4,6 +4,9 @@ import java.net.http.HttpResponse;
 import java.nio.file.Path;
 import java.util.Date;
 import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
 /**
@@ -13,32 +16,33 @@ public class TraceRhythm extends RequestRhythm
 {
 	BufferedReader reader;
 	private long baseTime;
+	//this is the first trace timestamp
 	private long traceBase;
+
+	private BiConsumer<HttpResponse<Path>, Long> action;
+	Timer timer;
 
 	public TraceRhythm(String traceFileName)
 	{
-		baseTime = System.currentTimeMillis();
+		timer = new Timer(true);
+		initialAction();
 		try
 		{
 			reader = new BufferedReader(
 					new FileReader("./trace/" + traceFileName));
-			traceBase = Long.parseLong(reader.readLine());
+			Trace trace = getOnePairData();
+			traceBase = trace.timeStamp;
+			baseTime = System.currentTimeMillis();
+			timer.schedule(getTraceTask(trace.content, action), 0);
 		} catch (FileNotFoundException e)
 		{
 			e.printStackTrace();
-			System.out.println("please check the traceFile!");
-		} catch (IOException e)
-		{
-			e.printStackTrace();
 		}
+
 	}
 
-	BiConsumer<HttpResponse<Path>, Long> action;
-
-	@Override public Timer makeTimer()
+	private void initialAction()
 	{
-		Timer timer = new Timer(true);
-
 		//this variable is used as a callback, first is response, second is requested url
 		action = (pathHttpResponse, startTimeStamp) -> {
 			if (pathHttpResponse == null)
@@ -62,42 +66,93 @@ public class TraceRhythm extends RequestRhythm
 			System.out.println("latency:" + latency);
 
 			//add more tasks
-			try
+			Trace trace = getOnePairData();
+			if (trace == null)
 			{
-				String tmpLine = reader.readLine();
-				if (tmpLine == null)
-				{
-					System.out.println("----------------------------use all traces!");
-					return;
-				}
-				baseTime += (Long.parseLong(tmpLine) - traceBase);
-				timer.schedule(getRequestTask(action), new Date(baseTime));
-			} catch (IOException e)
+				System.out
+						.println("----------------------------use all traces!");
+				return;
+			}
+			baseTime += (trace.timeStamp - traceBase);
+			timer.schedule(getTraceTask(trace.content, action),
+					new Date(baseTime));
+		};
+	}
+
+	@Override public Timer makeTimer()
+	{
+		//initial 100 tasks into Timer's taskQueen
+		for (int i = 0; i < 50; i++)
+		{
+			Trace trace = getOnePairData();
+			if (trace == null)
+				break;
+
+			baseTime += (trace.timeStamp - traceBase);
+			timer.schedule(getTraceTask(trace.content, action),
+					new Date(baseTime));
+		}
+		return timer;
+	}
+
+	//in trace model, build the Httprequest itself
+	private TimerTask getTraceTask(String content, BiConsumer action)
+	{
+		TimerTask task = new TimerTask()
+		{
+			@Override public void run()
 			{
-				e.printStackTrace();
+				//get the url
+				String url = URLIteration.constructURL(content);
+				System.out.println(requestCount + ". request URL:" + url);
+
+				//get the request which is just started in async way.
+				CompletableFuture<HttpResponse<Void>> response = myHttp
+						.get(url);
+				//after send the request, count one more
+				requestCount++;
+
+				//the first parameter is used to record the start time of request
+				//the second param is a callback which can help calculate the latency and size
+				response.completeOnTimeout(null, 5, TimeUnit.SECONDS);
+				response.thenAcceptBoth(CompletableFuture
+						.completedStage(System.currentTimeMillis()), action);
 			}
 		};
+		return task;
 
-		//initial 100 tasks into Timer's taskQueen
+	}
+
+	private Trace getOnePairData()
+	{
 		try
 		{
-			String line;
-			for (int i = 0; i < 50; i++)
+			String tmp = reader.readLine();
+			if (tmp == null)
 			{
-				line = reader.readLine();
-				if (line == null)
-				{
-					System.out.println("----------------------------use all traces!");
-					break;
-				}
-				baseTime += (Long.parseLong(line) - traceBase);
-				timer.schedule(getRequestTask(action), new Date(baseTime));
+				System.out
+						.println("----------------------------use all traces!");
+				return null;
 			}
-			//		timer.schedule(getRequestTask(),0,period);
+			String[] oneLineArray = tmp.split(",");
+			return new Trace(Long.parseLong(oneLineArray[1]), oneLineArray[4]);
 		} catch (IOException e)
 		{
 			e.printStackTrace();
 		}
-		return timer;
+		return null;
+
+	}
+
+	private class Trace
+	{
+		long timeStamp;
+		String content;
+
+		public Trace(long timeStamp, String content)
+		{
+			this.timeStamp = timeStamp;
+			this.content = content;
+		}
 	}
 }

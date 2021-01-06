@@ -14,34 +14,36 @@ public abstract class RequestRhythm
 	//testing duration: millisecond
 	private static int _duration;
 	private static Iterator urlIteration;
-	private MyHttp myHttp;
+	protected MyHttp myHttp;
 
 	protected double latencySum;
 	protected long sizeSum;
 	protected int requestCount;
 	protected int responseCount;
+	protected int granularity;
 
 	public RequestRhythm()
 	{
-		myHttp=new MyHttp();
+		myHttp = new MyHttp();
 		requestCount = 0;
-		responseCount=0;
+		responseCount = 0;
 		latencySum = 0;
 		sizeSum = 0;
 	}
 
 	public abstract Timer makeTimer();
-	public void execute(){
 
+	public void execute()
+	{
 
 		//control testing duration
 		setDurationTimer(makeTimer());
 	}
 
-	//caution:set duration in minutes, but save in millisecond
-	public static void setDuration(double aDuration)
+	//caution:set duration in second, but save in millisecond
+	public static void setDuration(int aDuration)
 	{
-		_duration = (int) Duration.ofSeconds((int)(aDuration*60)).toMillis();
+		_duration = aDuration;
 	}
 
 	public static int get_duration()
@@ -56,30 +58,51 @@ public abstract class RequestRhythm
 
 	public static void setUrlIteration(Iterator iteration)
 	{
-		urlIteration=iteration;
+		urlIteration = iteration;
 	}
 
-	public void setDurationTimer(Timer timer){
+	public void setDurationTimer(Timer taskTimer)
+	{
 
 		//control the test time
 		Timer durationTimer = new Timer();
+		//control the report period
+		Timer reportTimer = new Timer(true);
+		reportTimer.schedule(new TimerTask()
+		{
+			@Override public void run()
+			{
+
+				WorkAgent.reportByPrint(granularity, responseCount,
+						responseCount, latencySum, sizeSum);
+				//reset
+				resetReportVariables();
+			}
+		}, granularity*1000, granularity * 1000);
+
 		//use durationTimer to control the request duration
 		durationTimer.schedule(new TimerTask()
 		{
 			@Override public void run()
 			{
 				//when duration arrives, cancel all the requests
-				timer.cancel();
-
-				//print the result
-				WorkAgent.reportByPrint(get_duration(),requestCount,responseCount,latencySum,sizeSum);
-
+				taskTimer.cancel();
+				reportTimer.cancel();
 				System.exit(0);
 			}
-		}, get_duration());
+		}, get_duration() * 1000);
 	}
 
-	public TimerTask getRequestTask(BiConsumer action){
+	private void resetReportVariables()
+	{
+		requestCount = 0;
+		responseCount = 0;
+		latencySum = 0;
+		sizeSum = 0;
+	}
+
+	public TimerTask getRequestTask(BiConsumer action)
+	{
 		TimerTask task = new TimerTask()
 		{
 			@Override public void run()
@@ -88,7 +111,7 @@ public abstract class RequestRhythm
 				{
 					//get the url
 					String url = getUrlIteration().next();
-					System.out.println(requestCount+". request URL:" + url);
+					System.out.println(requestCount + ". request URL:" + url);
 
 					//get the request which is just started in async way.
 					CompletableFuture<HttpResponse<Void>> response = myHttp
@@ -100,11 +123,17 @@ public abstract class RequestRhythm
 					//the second param is a callback which can help calculate the latency and size
 					response.completeOnTimeout(null, 5, TimeUnit.SECONDS);
 					response.thenAcceptBoth(CompletableFuture
-									.completedStage(System.currentTimeMillis()),action);
+									.completedStage(System.currentTimeMillis()),
+							action);
 
 				}
 			}
 		};
 		return task;
+	}
+
+	public void setGranularity(int granularity)
+	{
+		this.granularity = granularity;
 	}
 }

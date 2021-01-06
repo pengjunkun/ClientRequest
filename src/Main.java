@@ -10,12 +10,17 @@ public class Main
 {
 	public static void main(String[] args)
 	{
-		Client client = new Client(0.3, Client.RHYTHM.TRACE, "THU.txt",
-				Client.POPULARITY.ZIPF, 1.07);
+		//when use the rhythm of balance, the parameter is treated as the requesting count per second
+		//when use the rhythm of possion, the parameter is treated as the expected period(millisecond) of a poisson process
+		//granularity: in second, the period of one average data
+//		Client client = new Client(0.3, Client.RHYTHM.POSSION, "1000",
+//				Client.POPULARITY.ZIPF, "1.07");
+		Client client=new Client(30, Client.RHYTHM.TRACE,"iqiyiTest.csv",2);
+
+
 		client.run();
 
 	}
-	//Ìí¼Ótrace content
 	//how to send reuqests
 	//test the maximum requests
 	//compress the duration time

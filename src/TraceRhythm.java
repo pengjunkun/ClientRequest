@@ -15,7 +15,7 @@ import java.util.function.BiConsumer;
 public class TraceRhythm extends RequestRhythm
 {
 	BufferedReader reader;
-	private long baseTime;
+	private long currentBase;
 	//this is the first trace timestamp
 	private long traceBase;
 
@@ -32,7 +32,7 @@ public class TraceRhythm extends RequestRhythm
 					new FileReader("./trace/" + traceFileName));
 			Trace trace = getOnePairData();
 			traceBase = trace.timeStamp;
-			baseTime = System.currentTimeMillis();
+			currentBase = System.currentTimeMillis();
 			timer.schedule(getTraceTask(trace.content, action), 0);
 		} catch (FileNotFoundException e)
 		{
@@ -73,24 +73,22 @@ public class TraceRhythm extends RequestRhythm
 						.println("----------------------------use all traces!");
 				return;
 			}
-			baseTime += (trace.timeStamp - traceBase);
 			timer.schedule(getTraceTask(trace.content, action),
-					new Date(baseTime));
+					new Date(currentBase+(trace.timeStamp - traceBase) * 1000));
 		};
 	}
 
 	@Override public Timer makeTimer()
 	{
-		//initial 100 tasks into Timer's taskQueen
-		for (int i = 0; i < 50; i++)
+		//initial  tasks into Timer's taskQueen
+		for (int i = 0; i < 300; i++)
 		{
 			Trace trace = getOnePairData();
 			if (trace == null)
 				break;
 
-			baseTime += (trace.timeStamp - traceBase);
 			timer.schedule(getTraceTask(trace.content, action),
-					new Date(baseTime));
+					new Date(currentBase+(trace.timeStamp - traceBase) * 1000));
 		}
 		return timer;
 	}

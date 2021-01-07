@@ -1,5 +1,5 @@
-/*
-	this class is used to create a new user who have some requests to send
+/**
+ *	this class is used to create a new user who have some requests to send
  */
 public class Client
 {

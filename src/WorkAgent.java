@@ -16,6 +16,7 @@ public class WorkAgent
 		RequestRhythm.setDuration(duration);
 	}
 
+
 	//2nd function, describe the request rhythm(interval time,unit: millisecond)
 	public void setRequestRhythm(Client.RHYTHM rhythm, String rhythm_param)
 	{
@@ -53,7 +54,6 @@ public class WorkAgent
 		//set the urlIteration in the function of 'setPopularity', as this variable will be created there.
 		requestRhythm.setUrlIteration(urlIteration);
 	}
-
 	public void setGranularity(int granularity)
 	{
 		requestRhythm.setGranularity(granularity);

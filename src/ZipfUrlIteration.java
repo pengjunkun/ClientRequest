@@ -16,7 +16,7 @@ public class ZipfUrlIteration extends URLIteration
 
 	@Override public String next()
 	{
-		return URLIteration.constructURL(zipfDistribution.sample());
+		return URLIteration.constructURL(""+zipfDistribution.sample());
 	}
 
 	public ZipfUrlIteration(double zipf_param)

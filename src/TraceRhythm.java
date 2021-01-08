@@ -29,7 +29,7 @@ public class TraceRhythm extends RequestRhythm
 		try
 		{
 			reader = new BufferedReader(
-					new FileReader("./trace/" + traceFileName));
+					new FileReader("./conf/" + traceFileName.substring(1,traceFileName.length()-1)));
 			Trace trace = getOnePairData();
 			traceBase = trace.timeStamp;
 			currentBase = System.currentTimeMillis();

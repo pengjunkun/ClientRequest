@@ -17,7 +17,7 @@ public class EvenUrlIteration extends URLIteration
 	{
 		if (index == URLIteration.rangeTO)
 			index = 0;
-		String tmp = URLIteration.constructURL(index++);
+		String tmp = URLIteration.constructURL(""+(index++));
 		return tmp;
 	}
 }

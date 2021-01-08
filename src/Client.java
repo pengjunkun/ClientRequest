@@ -26,6 +26,7 @@ public class Client
 		agent.setDuration(duration);
 		agent.setRequestRhythm(rhythm,rhythm_param);
 		agent.setPopularity(popularity,pop_param);
+		agent.setGranularity(granularity);
 	}
 
 	//this constructor is designed for trace model use

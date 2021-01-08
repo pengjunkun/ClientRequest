@@ -1,0 +1,8 @@
+#plese set these url related parameters in order.
+#please do not leave a blank line if there still has some lines
+#
+#1st:base url, where %s is a replacement for a string that will be replace by some string.
+http://gcp/2/seg-%s.m4s
+#
+#2nd: rangeTo, [1,rangTo] this used by EvenUrlIteraion and ZipfUrlIteration
+29

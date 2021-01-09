@@ -50,6 +50,11 @@ public class WorkAgent
 		case ZIPF:
 			urlIteration = new ZipfUrlIteration(Float.parseFloat(pop_param));
 			break;
+		case TRACE:
+			//which means each request will use trace: timestamp & contentId
+			requestRhythm.setUseTraceContent(true);
+			urlIteration=null;
+			break;
 		}
 		//set the urlIteration in the function of 'setPopularity', as this variable will be created there.
 		requestRhythm.setUrlIteration(urlIteration);

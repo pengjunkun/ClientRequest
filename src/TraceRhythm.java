@@ -24,16 +24,17 @@ public class TraceRhythm extends RequestRhythm
 
 	public TraceRhythm(String traceFileName)
 	{
+
 		timer = new Timer(true);
 		initialAction();
 		try
 		{
 			reader = new BufferedReader(
-					new FileReader("./conf/" + traceFileName.substring(1,traceFileName.length()-1)));
+//					new FileReader("./conf/" + traceFileName.substring(1,traceFileName.length()-1)));
+			new FileReader("./conf/" + traceFileName));
 			Trace trace = getOnePairData();
 			traceBase = trace.timeStamp;
 			currentBase = System.currentTimeMillis();
-			timer.schedule(getTraceTask(trace.content, action), 0);
 		} catch (FileNotFoundException e)
 		{
 			e.printStackTrace();
@@ -73,7 +74,7 @@ public class TraceRhythm extends RequestRhythm
 						.println("----------------------------use all traces!");
 				return;
 			}
-			timer.schedule(getTraceTask(trace.content, action),
+			timer.schedule(getTask(trace, action),
 					new Date(currentBase+(trace.timeStamp - traceBase) * 1000));
 		};
 	}
@@ -87,10 +88,19 @@ public class TraceRhythm extends RequestRhythm
 			if (trace == null)
 				break;
 
-			timer.schedule(getTraceTask(trace.content, action),
+			timer.schedule(getTask(trace, action),
 					new Date(currentBase+(trace.timeStamp - traceBase) * 1000));
 		}
 		return timer;
+	}
+
+	//get task(combine traceTask&normalTask)
+	private TimerTask getTask(Trace trace,BiConsumer action){
+		if (isUseTraceContent()){
+			return 	getTraceTask(trace.content,action);
+		}else {
+			return getRequestTask(action);
+		}
 	}
 
 	//in trace model, build the Httprequest itself
@@ -133,7 +143,9 @@ public class TraceRhythm extends RequestRhythm
 				return null;
 			}
 			String[] oneLineArray = tmp.split(",");
-			return new Trace(Long.parseLong(oneLineArray[1]), oneLineArray[4]);
+			String timestamp=oneLineArray[1];
+			String contentId=oneLineArray.length>=5?null:oneLineArray[4];
+			return new Trace(Long.parseLong(timestamp), contentId);
 		} catch (IOException e)
 		{
 			e.printStackTrace();

@@ -15,7 +15,7 @@ public class Client
 	//describe the requesting contents(urls) portion
 	public enum POPULARITY
 	{
-		EVEN, ZIPF
+		EVEN, ZIPF,TRACE
 	}
 
 	//init a agent to do the detail execution.
@@ -29,20 +29,6 @@ public class Client
 		agent.setGranularity(granularity);
 	}
 
-	//this constructor is designed for trace model use
-	public Client(int duration, RHYTHM rhythm, String rhythm_param,int granularity)
-	{
-		if (rhythm!=RHYTHM.TRACE)
-		{
-			System.out.println("This client constructor is only for Trace model!");
-			System.exit(1);
-		}
-		agent=new WorkAgent();
-		agent.setDuration(duration);
-		agent.setRequestRhythm(RHYTHM.TRACE,rhythm_param);
-		agent.setGranularity(granularity);
-		//in this model, the popularity of content is not needed!
-	}
 	//start
 	public void run(){
 		agent.doRequest();

@@ -40,6 +40,7 @@ public class Main
 		//           3.when use Trace, this is set to  be null;
 		//6th param: the granularity to report(in second)
 		Client client = null;
+
 		try
 		{
 			reader = new BufferedReader(new FileReader("./conf/client.conf"));
@@ -54,26 +55,10 @@ public class Main
 					continue;
 				params[index++] = oneLine;
 			}
-			if (params[1].equalsIgnoreCase("Trace"))
-			{
-				client = new Client(Integer.parseInt(params[0]),
-						Client.RHYTHM.TRACE, params[2],
-						Integer.parseInt(params[5]));
-			} else
-			{
-				Client.RHYTHM rhythm = params[1].equalsIgnoreCase("Balance") ?
-						Client.RHYTHM.BALANCE :
-						Client.RHYTHM.POSSION;
-
-				Client.POPULARITY popularity = params[3]
-						.equalsIgnoreCase("Even") ?
-						Client.POPULARITY.EVEN :
-						Client.POPULARITY.ZIPF;
-				client = new Client(Integer.parseInt(params[0]), rhythm,
-						params[2], popularity, params[4],
-						Integer.parseInt(params[5]));
-			}
-
+			client = new Client(Integer.parseInt(params[0]),
+					getRhythm(params[1]), params[2], getPopularity(params[3]),
+					params[4], Integer.parseInt(params[5]));
+			client.run();
 		} catch (FileNotFoundException e)
 		{
 			e.printStackTrace();
@@ -84,8 +69,30 @@ public class Main
 
 		//			Client client = new Client(30, Client.RHYTHM.TRACE, "iqiyiTest.csv", 2);
 
-		client.run();
 
+
+	}
+
+	private static Client.RHYTHM getRhythm(String rhythm)
+	{
+		if (rhythm.equalsIgnoreCase("Balance"))
+			return Client.RHYTHM.BALANCE;
+		else if (rhythm.equalsIgnoreCase("Possion"))
+			return Client.RHYTHM.POSSION;
+		else if (rhythm.equalsIgnoreCase("Trace"))
+			return Client.RHYTHM.TRACE;
+		return null;
+	}
+
+	private static Client.POPULARITY getPopularity(String popularity)
+	{
+		if (popularity.equalsIgnoreCase("Even"))
+			return Client.POPULARITY.EVEN;
+		else if (popularity.equalsIgnoreCase("Zipf"))
+			return Client.POPULARITY.ZIPF;
+		else if (popularity.equalsIgnoreCase("Trace"))
+			return Client.POPULARITY.TRACE;
+		return null;
 	}
 	//todo:
 	//how to send reuqests

@@ -13,8 +13,10 @@ public abstract class RequestRhythm
 {
 	//testing duration: millisecond
 	private static int _duration;
-	private static Iterator urlIteration;
+	protected Iterator urlIteration;
 	protected MyHttp myHttp;
+
+	private boolean useTraceContent;
 
 	protected double latencySum;
 	protected long sizeSum;
@@ -29,6 +31,17 @@ public abstract class RequestRhythm
 		responseCount = 0;
 		latencySum = 0;
 		sizeSum = 0;
+		useTraceContent=false;
+	}
+
+	public boolean isUseTraceContent()
+	{
+		return useTraceContent;
+	}
+
+	public void setUseTraceContent(boolean useTraceContent)
+	{
+		this.useTraceContent = useTraceContent;
 	}
 
 	public abstract Timer makeTimer();
@@ -51,14 +64,14 @@ public abstract class RequestRhythm
 		return _duration;
 	}
 
-	public static Iterator<String> getUrlIteration()
+	public  Iterator<String> getUrlIteration()
 	{
 		return urlIteration;
 	}
 
-	public static void setUrlIteration(Iterator iteration)
+	public void setUrlIteration(Iterator iteration)
 	{
-		urlIteration = iteration;
+		this.urlIteration = iteration;
 	}
 
 	public void setDurationTimer(Timer taskTimer)

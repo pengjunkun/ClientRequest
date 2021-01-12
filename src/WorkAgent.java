@@ -16,7 +16,6 @@ public class WorkAgent
 		RequestRhythm.setDuration(duration);
 	}
 
-
 	//2nd function, describe the request rhythm(interval time,unit: millisecond)
 	public void setRequestRhythm(Client.RHYTHM rhythm, String rhythm_param)
 	{
@@ -53,12 +52,13 @@ public class WorkAgent
 		case TRACE:
 			//which means each request will use trace: timestamp & contentId
 			requestRhythm.setUseTraceContent(true);
-			urlIteration=null;
+			urlIteration = null;
 			break;
 		}
 		//set the urlIteration in the function of 'setPopularity', as this variable will be created there.
 		requestRhythm.setUrlIteration(urlIteration);
 	}
+
 	public void setGranularity(int granularity)
 	{
 		requestRhythm.setGranularity(granularity);
@@ -74,16 +74,18 @@ public class WorkAgent
 			int responseCount, double latencySum, double sizeSum)
 	{
 
-		System.out.printf("===============report:%d==================\n",System.currentTimeMillis());
-		System.out.println(
-				"In " + duration + " seconds, sent " + requestCount
-						+ " requests, received " + responseCount);
+		MyLog.logger.info(String
+				.format("===============report:%d==================\n",
+						System.currentTimeMillis()));
+		MyLog.logger.info("In " + duration + " seconds, sent " + requestCount
+				+ " requests, received " + responseCount);
 		//calculte the average
-		System.out.printf("the average latency is: %.2f ms;\n",
-				(latencySum / responseCount));
-		System.out.printf("the average throughput is: %.2f KB/s.\n",
-				(sizeSum / 1024) / duration);
-		System.out.println("===============report==================");
+		MyLog.logger.info(String.format("the average latency is: %.2f ms;\n",
+				(latencySum / responseCount)));
+		MyLog.logger.info(String
+				.format("the average throughput is: %.2f KB/s.\n",
+						(sizeSum / 1024) / duration));
+		MyLog.logger.info("===============report==================");
 
 	}
 

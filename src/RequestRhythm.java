@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.net.http.HttpHeaders;
 import java.net.http.HttpResponse;
 import java.nio.file.Path;
@@ -8,6 +9,7 @@ import java.util.TimerTask;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
+import java.util.logging.*;
 
 public abstract class RequestRhythm
 {
@@ -23,7 +25,6 @@ public abstract class RequestRhythm
 	protected int requestCount;
 	protected int responseCount;
 	protected int granularity;
-
 	public RequestRhythm()
 	{
 		myHttp = new MyHttp();
@@ -31,7 +32,7 @@ public abstract class RequestRhythm
 		responseCount = 0;
 		latencySum = 0;
 		sizeSum = 0;
-		useTraceContent=false;
+		useTraceContent = false;
 	}
 
 	public boolean isUseTraceContent()
@@ -64,7 +65,7 @@ public abstract class RequestRhythm
 		return _duration;
 	}
 
-	public  Iterator<String> getUrlIteration()
+	public Iterator<String> getUrlIteration()
 	{
 		return urlIteration;
 	}
@@ -91,7 +92,7 @@ public abstract class RequestRhythm
 				//reset
 				resetReportVariables();
 			}
-		}, granularity*1000, granularity * 1000);
+		}, granularity * 1000, granularity * 1000);
 
 		//use durationTimer to control the request duration
 		durationTimer.schedule(new TimerTask()
@@ -124,7 +125,7 @@ public abstract class RequestRhythm
 				{
 					//get the url
 					String url = getUrlIteration().next();
-					System.out.println(requestCount + ". request URL:" + url);
+					MyLog.logger.fine(requestCount + ". request URL:" + url);
 
 					//get the request which is just started in async way.
 					CompletableFuture<HttpResponse<Void>> response = myHttp

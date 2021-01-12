@@ -27,40 +27,37 @@ public class BalanceRhythm extends RequestRhythm
 		long period = (long) (1000.0 / timesPerSecond);
 		if (period <= 0)
 		{
-			System.out.println(
-					"ERROR: please make sure the times per second is no more than 1000");
+			MyLog.logger
+					.severe("ERROR: please make sure the times per second is no more than 1000");
 			System.exit(1);
 		}
 
 		//this variable is used as a callback, first is response, second is requested url
-		BiConsumer<HttpResponse<Path>, Long> action=
+		BiConsumer<HttpResponse<Path>, Long> action =
 				//the two params are from two completedstages
-			(pathHttpResponse, startTimeStamp) -> {
-				if (pathHttpResponse == null)
-				{
-					System.out.println(
-							"There is one request timeout!!!");
-					//timeout is 5s
-					latencySum+=5000;
-					return;
-				}
+				(pathHttpResponse, startTimeStamp) -> {
+					if (pathHttpResponse == null)
+					{
+						MyLog.logger.severe("There is one request timeout!!!");
+						//timeout is 5s
+						latencySum += 5000;
+						return;
+					}
 
-				responseCount+=1;
-				HttpHeaders headers = pathHttpResponse.headers();
+					responseCount += 1;
+					HttpHeaders headers = pathHttpResponse.headers();
 
-				int size = Integer.parseInt(
-						headers.firstValue("Content-Length")
-								.orElse(null));
-				sizeSum += size;
+					int size = Integer.parseInt(
+							headers.firstValue("Content-Length").orElse(null));
+					sizeSum += size;
 
-				long latency = System.currentTimeMillis() - startTimeStamp;
-				latencySum += latency;
+					long latency = System.currentTimeMillis() - startTimeStamp;
+					latencySum += latency;
 
-				System.out.println(
-						String.format("fileSize:%s", size));
-				System.out.println("latency:" + latency);
-			};
-		timer.schedule(getRequestTask(action),0,period);
+					MyLog.logger.fine(String.format("fileSize:%s", size));
+					MyLog.logger.fine("latency:" + latency);
+				};
+		timer.schedule(getRequestTask(action), 0, period);
 		return timer;
 	}
 

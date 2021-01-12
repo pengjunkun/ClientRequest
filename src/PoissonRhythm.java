@@ -28,7 +28,7 @@ public class PoissonRhythm extends RequestRhythm
 		Timer timer = new Timer(true);
 		if (period_param <= 0)
 		{
-			System.out.println(
+			MyLog.logger.severe(
 					"ERROR: please make sure the parameter of possison rhythm");
 			System.exit(1);
 		}
@@ -37,7 +37,7 @@ public class PoissonRhythm extends RequestRhythm
 		action = (pathHttpResponse, startTimeStamp) -> {
 			if (pathHttpResponse == null)
 			{
-				System.out.println("There is one request timeout!!!");
+				MyLog.logger.severe("There is one request timeout!!!");
 				//timeout is 5s
 				latencySum += 5000;
 				return;
@@ -52,8 +52,8 @@ public class PoissonRhythm extends RequestRhythm
 			long latency = System.currentTimeMillis() - startTimeStamp;
 			latencySum += latency;
 
-			System.out.println(String.format("fileSize:%s", size));
-			System.out.println("latency:" + latency);
+			MyLog.logger.fine(String.format("fileSize:%s", size));
+			MyLog.logger.fine("latency:" + latency);
 
 			//add more tasks
 			baseTime += getNextPeriod(period_param);

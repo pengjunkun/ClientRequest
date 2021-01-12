@@ -18,6 +18,7 @@ public class TraceRhythm extends RequestRhythm
 	private long currentBase;
 	//this is the first trace timestamp
 	private long traceBase;
+	private float slowRatio;
 
 	private BiConsumer<HttpResponse<Path>, Long> action;
 	Timer timer;
@@ -29,13 +30,20 @@ public class TraceRhythm extends RequestRhythm
 		initialAction();
 		try
 		{
+			reader = new BufferedReader(new FileReader("./conf/slowRatio.txt"));
+			slowRatio = Float.parseFloat(reader.readLine());
+			reader.close();
+
 			reader = new BufferedReader(
-//					new FileReader("./conf/" + traceFileName.substring(1,traceFileName.length()-1)));
-			new FileReader("./conf/" + traceFileName));
+					//					new FileReader("./conf/" + traceFileName.substring(1,traceFileName.length()-1)));
+					new FileReader("./conf/" + traceFileName));
 			Trace trace = getOnePairData();
 			traceBase = trace.timeStamp;
 			currentBase = System.currentTimeMillis();
 		} catch (FileNotFoundException e)
+		{
+			e.printStackTrace();
+		} catch (IOException e)
 		{
 			e.printStackTrace();
 		}
@@ -48,7 +56,7 @@ public class TraceRhythm extends RequestRhythm
 		action = (pathHttpResponse, startTimeStamp) -> {
 			if (pathHttpResponse == null)
 			{
-				System.out.println("There is one request timeout!!!");
+				MyLog.logger.severe("There is one request timeout!!!");
 				//timeout is 5s
 				latencySum += 5000;
 				return;
@@ -63,19 +71,18 @@ public class TraceRhythm extends RequestRhythm
 			long latency = System.currentTimeMillis() - startTimeStamp;
 			latencySum += latency;
 
-			System.out.println(String.format("fileSize:%s", size));
-			System.out.println("latency:" + latency);
+			MyLog.logger.fine(String.format("fileSize:%s", size));
+			MyLog.logger.fine("latency:" + latency);
 
 			//add more tasks
 			Trace trace = getOnePairData();
 			if (trace == null)
 			{
-				System.out
-						.println("----------------------------use all traces!");
+				MyLog.logger.info("----------------------------use all traces!");
 				return;
 			}
-			timer.schedule(getTask(trace, action),
-					new Date(currentBase+(trace.timeStamp - traceBase) * 1000));
+			timer.schedule(getTask(trace, action), new Date((long) (currentBase
+					+ (trace.timeStamp - traceBase) * 1000 * slowRatio)));
 		};
 	}
 
@@ -88,17 +95,20 @@ public class TraceRhythm extends RequestRhythm
 			if (trace == null)
 				break;
 
-			timer.schedule(getTask(trace, action),
-					new Date(currentBase+(trace.timeStamp - traceBase) * 1000));
+			timer.schedule(getTask(trace, action), new Date((long) (currentBase
+					+ (trace.timeStamp - traceBase) * 1000 * slowRatio)));
 		}
 		return timer;
 	}
 
 	//get task(combine traceTask&normalTask)
-	private TimerTask getTask(Trace trace,BiConsumer action){
-		if (isUseTraceContent()){
-			return 	getTraceTask(trace.content,action);
-		}else {
+	private TimerTask getTask(Trace trace, BiConsumer action)
+	{
+		if (isUseTraceContent())
+		{
+			return getTraceTask(trace.content, action);
+		} else
+		{
 			return getRequestTask(action);
 		}
 	}
@@ -112,7 +122,7 @@ public class TraceRhythm extends RequestRhythm
 			{
 				//get the url
 				String url = URLIteration.constructURL(content);
-				System.out.println(requestCount + ". request URL:" + url);
+				MyLog.logger.fine(requestCount + ". request URL:" + url);
 
 				//get the request which is just started in async way.
 				CompletableFuture<HttpResponse<Void>> response = myHttp
@@ -138,13 +148,13 @@ public class TraceRhythm extends RequestRhythm
 			String tmp = reader.readLine();
 			if (tmp == null)
 			{
-				System.out
-						.println("----------------------------use all traces!");
+				MyLog.logger.info("----------------------------use all traces!");
 				return null;
 			}
 			String[] oneLineArray = tmp.split(",");
-			String timestamp=oneLineArray[1];
-			String contentId=oneLineArray.length>=5?null:oneLineArray[4];
+			String timestamp = oneLineArray[1];
+			String contentId =
+					oneLineArray.length >= 5 ? null : oneLineArray[4];
 			return new Trace(Long.parseLong(timestamp), contentId);
 		} catch (IOException e)
 		{
